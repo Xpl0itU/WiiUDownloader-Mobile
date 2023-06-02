@@ -2,12 +2,12 @@ package com.xpl0itu.wiiudownloader_mobile
 
 import android.os.Bundle
 import android.widget.Button
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.lang.reflect.Type
 
 
 class QueueActivity : AppCompatActivity() {
@@ -15,6 +15,13 @@ class QueueActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var queueAdapter: QueueAdapter
     private var itemList: MutableList<Item> = mutableListOf()
+
+    private val pickFolder = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        uri?.let { folderUri ->
+            val folderPath = folderUri.path
+            downloadQueue(itemList, folderPath)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,22 +46,18 @@ class QueueActivity : AppCompatActivity() {
 
         val downloadButton = findViewById<Button>(R.id.downloadButton)
         downloadButton.setOnClickListener {
-            downloadQueue(itemList)
+            pickFolder.launch(null)
         }
     }
 
-    private fun downloadQueue(itemList: MutableList<Item>) {
-        println(itemList)
+    private fun downloadQueue(itemList: MutableList<Item>, folderPath: String?) {
+        for (item in itemList) {
+            processTitleId(context = applicationContext, titleId = item.titleID, titleKey = item.titleKey, name = item.name, outputDir = folderPath)
+        }
     }
 
     private fun removeFromQueue(item: Item) {
         itemList.remove(item)
-        saveItemListToPreferences()
-        queueAdapter.setItems(itemList)
-    }
-
-    private fun removeFromQueue(position: Int) {
-        val item = itemList.removeAt(position)
         saveItemListToPreferences()
         queueAdapter.setItems(itemList)
     }

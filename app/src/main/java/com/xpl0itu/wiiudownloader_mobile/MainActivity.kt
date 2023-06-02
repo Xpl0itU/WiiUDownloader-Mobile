@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     @OptIn(DelicateCoroutinesApi::class)
     private fun loadData() {
         GlobalScope.launch(Dispatchers.IO) {
-            val url = "http://titlekeys.ovh/json/titlekeys.json"
+            val url = "https://titlekeys.ovh/json/titlekeys.json"
             val request = Request.Builder()
                 .url(url)
                 .build()
