@@ -2,6 +2,7 @@ package com.xpl0itu.wiiudownloader_mobile
 
 import android.content.Context
 import android.net.Uri
+import android.os.StrictMode
 import androidx.documentfile.provider.DocumentFile
 import java.io.File
 import kotlin.io.path.Path
@@ -16,6 +17,9 @@ fun processTitleId(
     retryCount: Int = 3,
     ticketsOnly: Boolean = false
 ) {
+
+    val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+    StrictMode.setThreadPolicy(policy)
 
     val typecheck = titleId.substring(4, 8)
     val updatedDirname = when (typecheck) {
