@@ -7,8 +7,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class ItemAdapter(
-    private val items: List<Item>,
-    private val onItemClicked: (Item) -> Unit
+    private val items: Array<gtitlesWrapper.TitleEntry>,
+    private val onItemClicked: (gtitlesWrapper.TitleEntry) -> Unit
 ) : RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

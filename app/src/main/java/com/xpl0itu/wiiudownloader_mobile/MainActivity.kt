@@ -1,75 +1,63 @@
 package com.xpl0itu.wiiudownloader_mobile
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.io.IOException
-import android.content.Intent
-import android.widget.Button
-import kotlinx.coroutines.DelicateCoroutinesApi
-import java.util.ArrayList
-
 
 class MainActivity : AppCompatActivity() {
 
-    private val queue: MutableList<Item> = mutableListOf()
+    private val queue: MutableList<gtitlesWrapper.TitleEntry> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        loadData()
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        loadData(recyclerView)
 
         val queueButton = findViewById<Button>(R.id.queueButton)
         queueButton.setOnClickListener {
             val intent = Intent(this, QueueActivity::class.java)
-            intent.putExtra("itemList", ArrayList(queue)) // Pass the queue list to the QueueActivity
+            intent.putExtra("itemList", ArrayList(queue)) // Pass the current state of the queue
             startActivity(intent)
         }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun loadData() {
+    private fun loadData(recyclerView: RecyclerView) {
         GlobalScope.launch(Dispatchers.IO) {
-            val url = "https://titlekeys.ovh/json/titlekeys.json"
-            val request = Request.Builder()
-                .url(url)
-                .build()
-
-            val client = OkHttpClient()
             try {
-                val response = client.newCall(request).execute()
-                val jsonData = response.body()?.string()
-                parseJson(jsonData)
+                val titleEntriesPtr = gtitlesWrapper.getTitleEntries(4)
+                populateData(titleEntriesPtr, recyclerView)
             } catch (e: IOException) {
                 e.printStackTrace()
             }
         }
     }
 
-    private suspend fun parseJson(jsonData: String?) {
+    private suspend fun populateData(titleEntries: Array<gtitlesWrapper.TitleEntry>, recyclerView: RecyclerView) {
         withContext(Dispatchers.Main) {
             try {
-                val items = Gson().fromJson(jsonData, Array<Item>::class.java).toList()
-                val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
-                val adapter = ItemAdapter(items) { item -> addToQueue(item) }
+                val adapter = ItemAdapter(titleEntries) { item -> addToQueue(item) }
                 recyclerView.adapter = adapter
-                recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-    private fun addToQueue(item: Item) {
+    private fun addToQueue(item: gtitlesWrapper.TitleEntry) {
         queue.add(item)
     }
 }

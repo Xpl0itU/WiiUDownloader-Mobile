@@ -6,11 +6,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class QueueAdapter(private val onItemClick: (Item) -> Unit) : RecyclerView.Adapter<QueueAdapter.QueueViewHolder>() {
+class QueueAdapter(private val onItemClick: (gtitlesWrapper.TitleEntry) -> Unit) : RecyclerView.Adapter<QueueAdapter.QueueViewHolder>() {
 
-    private var itemList: MutableList<Item> = mutableListOf()
+    private var itemList: MutableList<gtitlesWrapper.TitleEntry> = mutableListOf()
 
-    fun setItems(items: List<Item>) {
+    fun setItems(items: List<gtitlesWrapper.TitleEntry>) {
         itemList.clear()
         itemList.addAll(items)
         notifyDataSetChanged()
@@ -37,7 +37,7 @@ class QueueAdapter(private val onItemClick: (Item) -> Unit) : RecyclerView.Adapt
     inner class QueueViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val titleTextView: TextView = itemView.findViewById(R.id.titleTextView)
 
-        fun bind(item: Item) {
+        fun bind(item: gtitlesWrapper.TitleEntry) {
             titleTextView.text = item.name
         }
     }

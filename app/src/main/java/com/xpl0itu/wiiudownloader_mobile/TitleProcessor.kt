@@ -1,7 +1,10 @@
 package com.xpl0itu.wiiudownloader_mobile
 
 import android.content.Context
+import android.net.Uri
+import androidx.documentfile.provider.DocumentFile
 import java.io.File
+import kotlin.io.path.Path
 
 fun processTitleId(
     context: Context,
@@ -9,36 +12,25 @@ fun processTitleId(
     titleKey: String,
     name: String? = null,
     region: String? = null,
-    outputDir: String? = null,
+    outputDir: Uri? = null,
     retryCount: Int = 3,
     ticketsOnly: Boolean = false
 ) {
-    val dirname = if (name != null) {
-        "$titleId - $region - $name"
-    } else {
-        titleId
-    }
 
     val typecheck = titleId.substring(4, 8)
     val updatedDirname = when (typecheck) {
-        "000c" -> "$dirname - DLC"
-        "000e" -> "$dirname - Update"
-        else -> dirname
+        "000c" -> "$name $titleId - DLC"
+        "000e" -> "$name $titleId - Update"
+        else -> "$name $titleId"
     }
 
-    val rawdir = File("install", safeFilename(updatedDirname))
+    val documentFile = outputDir?.let { DocumentFile.fromTreeUri(context, it) }
+
+    val rawdir = Path(safeFilename(updatedDirname))
+
+    val targetDir = documentFile?.createDirectory(rawdir.toString()).toString()
 
     println("Starting work in: \"$rawdir\"")
-
-    val targetDir = if (outputDir != null) {
-        File(outputDir, rawdir.path)
-    } else {
-        rawdir
-    }
-
-    if (!targetDir.exists()) {
-        targetDir.mkdirs()
-    }
 
     // download TMD
     println("Downloading TMD...")
@@ -105,5 +97,5 @@ fun processTitleId(
         }
     }
 
-    println("\nTitle download complete in \"$dirname\"\n")
+    println("\nTitle download complete in \"$titleId\"\n")
 }
